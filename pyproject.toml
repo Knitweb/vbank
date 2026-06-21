@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knitweb-vbank"
+version = "0.1.0"
+description = "vBank voting domain package for Knitweb/Pulse"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "Proprietary" }
+authors = [{ name = "Knitweb" }]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+markers = [
+  "property: deterministic property/regression tests",
+]
+testpaths = ["tests"]
