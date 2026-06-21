@@ -22,8 +22,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install test runner
-        run: python -m pip install --upgrade pip pytest
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip pytest
+          python -m pip install -e pulse
 
       - name: Compile
         run: PYTHONPATH=src:pulse/src python -m py_compile src/knitweb_vbank/*.py

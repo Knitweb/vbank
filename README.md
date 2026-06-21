@@ -21,16 +21,19 @@ fabric Web storage, attestations, and personhood tickets.
 
 ## Development
 
-Until Pulse is published as a package, point `PYTHONPATH` at this repo and a Pulse checkout:
+Until Pulse is published as a package, keep a Pulse checkout available and install it
+editable for local tests:
 
 ```bash
-PYTHONPATH=src:/private/tmp/pulse-pr187/src python -m pytest -q
+git clone https://github.com/Knitweb/pulse ../pulse
+python -m pip install -e ../pulse
+PYTHONPATH=src:../pulse/src python -m pytest -q
 ```
 
-If you have a fresher Pulse checkout, use its `src` path instead.
+If you already have a Pulse checkout, use that path instead of cloning again.
 
-The GitHub Actions workflow checks out `Knitweb/pulse` beside this repo and runs the same
-package compile + pytest flow with `PYTHONPATH=src:pulse/src`.
+The GitHub Actions workflow checks out `Knitweb/pulse` beside this repo, installs it
+editable, and runs the same package compile + pytest flow with `PYTHONPATH=src:pulse/src`.
 
 ## New in this repo
 
