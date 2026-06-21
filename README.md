@@ -29,6 +29,9 @@ PYTHONPATH=src:/private/tmp/pulse-pr187/src python -m pytest -q
 
 If you have a fresher Pulse checkout, use its `src` path instead.
 
+The GitHub Actions workflow checks out `Knitweb/pulse` beside this repo and runs the same
+package compile + pytest flow with `PYTHONPATH=src:pulse/src`.
+
 ## New in this repo
 
 The `vbank-election` manifest is the first layer that belongs naturally outside the

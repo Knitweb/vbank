@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out vBank
+        uses: actions/checkout@v4
+
+      - name: Check out Pulse dependency
+        uses: actions/checkout@v4
+        with:
+          repository: Knitweb/pulse
+          path: pulse
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test runner
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Compile
+        run: PYTHONPATH=src:pulse/src python -m py_compile src/knitweb_vbank/*.py
+
+      - name: Tests
+        run: PYTHONPATH=src:pulse/src python -m pytest -q
