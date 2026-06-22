@@ -25,6 +25,24 @@ Provided by Pulse:
 - fabric `Web` storage;
 - personhood tickets and scope nullifiers.
 
+## Agent Identity Issuance Boundary
+
+vBank may grow into an issuer of traceable agent identity attestations, but it should still
+avoid owning raw identity primitives on the public fabric.
+
+That means:
+
+- ballots, tallies, and public election records remain PII-free;
+- public attestations should carry only pairwise or agent identifiers, issuer/provider
+  trust anchors, validity windows, revocation pointers, and evidence digests;
+- copies of identity documents, liveness evidence, and service-provider qualification
+  evidence must stay in an encrypted off-fabric evidence vault;
+- any “traceable to a real person” requirement should resolve through that encrypted
+  evidence vault plus provider due process, not through public replicated records.
+
+This keeps the current privacy boundary intact while still allowing stronger accountability
+for agents and operators.
+
 ## Election Manifests
 
 `vbank-election` is a signed manifest for a user-facing election event. It contains:
