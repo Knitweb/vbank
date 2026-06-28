@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vank · P2P Finance Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0f1117;color:#c9cad4;min-height:100vh;font-size:14px}
+h2{color:#fff;margin-bottom:16px;font-size:1.1rem;letter-spacing:.5px}
+h3{color:#a0a0b8;font-size:.75rem;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.app{max-width:1120px;margin:0 auto;padding:20px}
+header{display:flex;align-items:center;gap:10px;margin-bottom:22px;border-bottom:1px solid #1e1f2e;padding-bottom:14px}
+header h1{font-size:1.3rem;color:#fff;letter-spacing:2px;font-weight:700}
+header .logo{color:#6c63ff;font-size:1.6rem;font-weight:900}
+header .demo{margin-left:auto;color:#555;font-size:.75rem}
+nav{display:flex;gap:4px;margin-bottom:22px;background:#13141f;border-radius:8px;padding:4px}
+nav button{flex:1;padding:9px 4px;border:none;background:transparent;color:#777;border-radius:6px;font-size:.82rem;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+nav button.active{background:#6c63ff;color:#fff;font-weight:600}
+nav button:hover:not(.active){background:#1e1f2e;color:#c9cad4}
+.section{display:none}
+.section.active{display:block}
+.card{background:#13141f;border-radius:10px;padding:18px;margin-bottom:16px;border:1px solid #1e1f2e}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{background:#13141f;border-radius:10px;padding:16px;border:1px solid #1e1f2e}
+.stat label{font-size:.72rem;color:#555;text-transform:uppercase;letter-spacing:.8px;display:block}
+.stat value{display:block;font-size:1.25rem;color:#fff;font-weight:600;margin-top:4px}
+.stat .sub{font-size:.75rem;margin-top:2px}
+.pos{color:#4ade80}.neg{color:#f87171}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{text-align:left;padding:7px 10px;color:#555;font-weight:500;border-bottom:1px solid #1e1f2e;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+td{padding:7px 10px;border-bottom:1px solid #111827}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#1a1b28}
+input,select{background:#0f1117;border:1px solid #2a2b3d;color:#e0e0e8;padding:8px 10px;border-radius:6px;font-size:.83rem;width:100%;outline:none}
+input:focus,select:focus{border-color:#6c63ff}
+.field{display:block;margin-bottom:11px;font-size:.8rem}
+.field span{display:block;margin-bottom:4px;color:#888}
+.btn{display:inline-block;padding:8px 16px;background:#6c63ff;color:#fff;border:none;border-radius:6px;font-size:.83rem;font-weight:600;cursor:pointer;transition:background .2s}
+.btn:hover{background:#7c73ff}
+.btn.sm{padding:4px 10px;font-size:.73rem}
+.btn.outline{background:transparent;border:1px solid #6c63ff;color:#6c63ff}
+.btn.outline:hover{background:#6c63ff;color:#fff}
+.flex{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+.result{background:#0f1117;border-radius:8px;padding:12px;margin-top:10px;border:1px solid #1e1f2e;font-size:.88rem;color:#a0a0b8}
+.result strong{color:#6c63ff;font-size:1.05rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.72rem;font-weight:600}
+.badge.g{background:#14532d;color:#4ade80}.badge.y{background:#713f12;color:#fbbf24}.badge.r{background:#450a0a;color:#f87171}
+.pie-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-top:6px}
+.legend{font-size:.78rem}
+.legend div{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.legend div span{width:11px;height:11px;border-radius:2px;display:inline-block;flex-shrink:0}
+.bar-chart{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.bar-row{display:flex;align-items:center;gap:8px;font-size:.8rem}
+.bar-row .blabel{width:80px;color:#888;text-align:right}
+.bar-row .bbg{flex:1;background:#1e1f2e;border-radius:3px;height:16px;overflow:hidden}
+.bar-row .bfill{height:100%;border-radius:3px;transition:width .6s}
+.bar-row .bval{width:36px;color:#c9cad4;text-align:right}
+.delta-up td{color:#4ade80}.delta-dn td{color:#f87171}
+@media(max-width:680px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">▲</div>
+    <h1>VANK</h1>
+    <div class="demo">P2P Finance · Demo Mode · nl-NL</div>
+  </header>
+  <nav>
+    <button onclick="tab('portfolio')" id="t-portfolio" class="active">Portfolio</button>
+    <button onclick="tab('fund')" id="t-fund">Fund</button>
+    <button onclick="tab('savings')" id="t-savings">Savings</button>
+    <button onclick="tab('loans')" id="t-loans">Loans</button>
+    <button onclick="tab('ledger')" id="t-ledger">Ledger</button>
+  </nav>
+
+  <!-- PORTFOLIO -->
+  <div id="portfolio" class="section active">
+    <div class="grid4" id="port-stats"></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><h3>Positions</h3><table id="pos-table"></table></div>
+      <div class="card">
+        <h3>Allocation</h3>
+        <div class="pie-wrap">
+          <svg id="pie-svg" width="150" height="150" viewBox="-1 -1 2 2" style="transform:rotate(-90deg);flex-shrink:0"></svg>
+          <div class="legend" id="pie-legend"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUND -->
+  <div id="fund" class="section">
+    <div class="grid3" id="fund-stats"></div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><h3>Allocation</h3><div id="fund-bars"></div></div>
+      <div class="card">
+        <h3>Member Value Calculator</h3>
+        <label class="field"><span>Units</span><input type="number" id="calc-units" value="100" oninput="calcMember()"></label>
+        <div class="result" id="calc-result"></div>
+        <div style="margin-top:14px">
+          <button class="btn outline" onclick="proposeRebalance()">Propose Rebalance</button>
+        </div>
+        <div id="rb-wrap" style="display:none;margin-top:12px">
+          <h3>Delta Table</h3>
+          <table id="rb-table"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVINGS -->
+  <div id="savings" class="section">
+    <div class="grid2">
+      <div class="card">
+        <h3>New Deposit</h3>
+        <label class="field"><span>Product</span>
+          <select id="sav-prod"><option>Flex Savings</option><option>Fixed Term</option><option>Growth Plus</option></select>
+        </label>
+        <label class="field"><span>Amount (EUR)</span><input type="number" id="sav-amt" value="5000" oninput="calcInterest()"></label>
+        <label class="field"><span>Period Type</span>
+          <select id="sav-per" onchange="calcInterest()">
+            <option value="daily">Daily</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="annual">Annual</option>
+            <option value="anniversary">Anniversary Monthly</option>
+          </select>
+        </label>
+        <label class="field"><span>Duration (periods)</span><input type="number" id="sav-dur" value="12" oninput="calcInterest()"></label>
+        <div class="result" id="sav-result"></div>
+        <button class="btn" style="margin-top:12px" onclick="alert('Deposit aangemaakt (demo)')">Open Deposit</button>
+      </div>
+      <div class="card"><h3>Active Deposits</h3><table id="dep-table"></table></div>
+    </div>
+  </div>
+
+  <!-- LOANS -->
+  <div id="loans" class="section">
+    <div class="grid2">
+      <div class="card">
+        <h3>Post Offer</h3>
+        <label class="field"><span>Amount (EUR)</span><input type="number" id="lo-amt" value="10000"></label>
+        <label class="field"><span>Rate (% p.a.)</span><input type="number" id="lo-rate" value="6.5" step="0.1"></label>
+        <label class="field"><span>Term (months)</span><input type="number" id="lo-term" value="24"></label>
+        <label class="field"><span>Purpose</span><input type="text" id="lo-purpose" value="Working capital"></label>
+        <button class="btn" onclick="alert('Aanbod geplaatst (demo)')">Post Offer</button>
+      </div>
+      <div class="card"><h3>Browse Requests</h3><table id="req-table"></table></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <h3>Loan Schedule Calculator</h3>
+      <div class="flex">
+        <label class="field" style="margin:0;flex:1"><span>Principal (EUR)</span><input type="number" id="ls-p" value="20000" oninput="calcLoan()"></label>
+        <label class="field" style="margin:0;flex:1"><span>Rate (% p.a.)</span><input type="number" id="ls-r" value="7" step="0.1" oninput="calcLoan()"></label>
+        <label class="field" style="margin:0;flex:1"><span>Term (months)</span><input type="number" id="ls-t" value="36" oninput="calcLoan()"></label>
+      </div>
+      <div class="result" id="loan-emi"></div>
+      <div style="margin-top:10px;overflow-x:auto"><table id="amort-table"></table></div>
+    </div>
+    <div class="card" style="margin-top:0"><h3>Active Loans</h3><table id="active-loans"></table></div>
+  </div>
+
+  <!-- LEDGER -->
+  <div id="ledger" class="section">
+    <div class="grid2">
+      <div class="card"><h3>Trial Balance</h3><table id="trial-table"></table></div>
+      <div class="card">
+        <h3>Filter Journal</h3>
+        <div class="flex">
+          <label class="field" style="margin:0;flex:1"><span>From</span><input type="date" id="led-from" value="2026-01-01" onchange="renderJournal()"></label>
+          <label class="field" style="margin:0;flex:1"><span>To</span><input type="date" id="led-to" value="2026-06-28" onchange="renderJournal()"></label>
+        </div>
+        <button class="btn outline" style="margin-top:12px" onclick="exportCSV()">Export CSV</button>
+      </div>
+    </div>
+    <div class="card"><h3>Journal Entries</h3><table id="journal-table"></table></div>
+  </div>
+</div>
+
+<script>
+const N = (n,d=2) => n.toLocaleString('nl-NL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const PCT = n => (n>=0?'+':'')+n.toFixed(2)+'%';
+const C = ['#6c63ff','#4ade80','#f87171','#fbbf24','#38bdf8','#f97316','#a78bfa'];
+
+/* ---- PORTFOLIO ---- */
+const pos = [
+  {a:'BTC',     u:0.85,  p:58200, c:52000},
+  {a:'ETH',     u:12.4,  p:3150,  c:2800},
+  {a:'USDC',    u:8500,  p:1,     c:1},
+  {a:'vank-tkn',u:5000,  p:0.82,  c:0.60},
+  {a:'EU Bond', u:42,    p:98.50, c:101.20},
+];
+function renderPortfolio(){
+  const rows = pos.map(p=>{
+    const v=p.u*p.p, pnl=(v-p.u*p.c)/(p.u*p.c)*100;
+    return `<tr><td>${p.a}</td><td>${N(p.u)}</td><td>€${N(p.p)}</td><td>€${N(v)}</td><td class="${pnl>=0?'pos':'neg'}">${PCT(pnl)}</td></tr>`;
+  }).join('');
+  document.getElementById('pos-table').innerHTML=`<thead><tr><th>Asset</th><th>Units</th><th>Price</th><th>Value</th><th>P&amp;L%</th></tr></thead><tbody>${rows}</tbody>`;
+  const nav=pos.reduce((s,p)=>s+p.u*p.p,0);
+  const cost=pos.reduce((s,p)=>s+p.u*p.c,0);
+  const upnl=nav-cost;
+  const st=[
+    {l:'Total NAV',    v:'€'+N(nav),    s:''},
+    {l:'Unrealised P&L', v:'€'+N(upnl), s:PCT(upnl/cost*100), cls:upnl>=0?'pos':'neg'},
+    {l:'Sharpe Ratio',   v:'1,42',       s:'(12M trailing)'},
+    {l:'Max Drawdown',   v:'-18,3%',     s:'(peak-to-trough)'},
+  ];
+  document.getElementById('port-stats').innerHTML=st.map(s=>`<div class="stat"><label>${s.l}</label><value>${s.v}</value>${s.s?`<div class="sub ${s.cls||''}">${s.s}</div>`:''}</div>`).join('');
+  // Pie SVG
+  const total=nav; let angle=0;
+  const paths=pos.map((p,i)=>{
+    const pct=p.u*p.p/total, a=pct*Math.PI*2;
+    const x1=Math.cos(angle),y1=Math.sin(angle),x2=Math.cos(angle+a),y2=Math.sin(angle+a);
+    const d=`M0 0 L${x1.toFixed(4)} ${y1.toFixed(4)} A1 1 0 ${a>Math.PI?1:0} 1 ${x2.toFixed(4)} ${y2.toFixed(4)}Z`;
+    angle+=a;
+    return `<path d="${d}" fill="${C[i]}" opacity=".88"/>`;
+  }).join('');
+  document.getElementById('pie-svg').innerHTML=paths;
+  document.getElementById('pie-legend').innerHTML=pos.map((p,i)=>`<div><span style="background:${C[i]}"></span>${p.a} ${(p.u*p.p/total*100).toFixed(1)}%</div>`).join('');
+}
+
+/* ---- FUND ---- */
+const fd={unitPrice:10.45,nav:2145000,members:48};
+const alloc=[{n:'Loans',p:42},{n:'Bonds',p:25},{n:'Crypto',p:18},{n:'Cash',p:15}];
+const target=[{n:'Loans',p:40},{n:'Bonds',p:28},{n:'Crypto',p:20},{n:'Cash',p:12}];
+function renderFund(){
+  document.getElementById('fund-stats').innerHTML=[
+    {l:'Unit Price', v:'€'+N(fd.unitPrice)},
+    {l:'Total NAV',  v:'€'+N(fd.nav,0)},
+    {l:'Members',    v:fd.members},
+  ].map(s=>`<div class="stat"><label>${s.l}</label><value>${s.v}</value></div>`).join('');
+  document.getElementById('fund-bars').innerHTML='<div class="bar-chart">'+
+    alloc.map((a,i)=>`<div class="bar-row"><div class="blabel">${a.n}</div><div class="bbg"><div class="bfill" style="width:${a.p}%;background:${C[i]}"></div></div><div class="bval">${a.p}%</div></div>`).join('')+
+    '</div>';
+  calcMember();
+}
+function calcMember(){
+  const u=parseFloat(document.getElementById('calc-units').value)||0;
+  document.getElementById('calc-result').innerHTML=`Waarde: <strong>€${N(u*fd.unitPrice)}</strong> voor ${N(u,0)} units`;
+}
+function proposeRebalance(){
+  const w=document.getElementById('rb-wrap');
+  w.style.display=w.style.display==='none'?'block':'none';
+  const rows=alloc.map((a,i)=>{const d=target[i].p-a.p;return `<tr class="${d>=0?'delta-up':'delta-dn'}"><td>${a.n}</td><td>${a.p}%</td><td>${target[i].p}%</td><td>${d>=0?'+':''}${d}%</td></tr>`;}).join('');
+  document.getElementById('rb-table').innerHTML=`<thead><tr><th>Asset</th><th>Huidig</th><th>Doel</th><th>Delta</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+/* ---- SAVINGS ---- */
+const deps=[
+  {prod:'Fixed Term',  amt:10000,rate:3.5,start:'2025-10-01',mat:'2026-10-01',accrued:262.5},
+  {prod:'Growth Plus', amt:5000, rate:4.2,start:'2026-01-01',mat:'2026-12-31',accrued:87.5},
+  {prod:'Flex Savings',amt:2000, rate:2.1,start:'2026-03-15',mat:'2027-03-15',accrued:14.2},
+];
+function renderSavings(){
+  const rows=deps.map(d=>{
+    const days=Math.max(0,Math.round((new Date(d.mat)-new Date())/86400000));
+    const bc=days<30?'r':days<90?'y':'g';
+    return `<tr><td>${d.prod}</td><td>€${N(d.amt,0)}</td><td>${d.rate}%</td><td class="pos">€${N(d.accrued)}</td><td><span class="badge ${bc}">${days}d</span></td></tr>`;
+  }).join('');
+  document.getElementById('dep-table').innerHTML=`<thead><tr><th>Product</th><th>Bedrag</th><th>Rente</th><th>Opgebouwd</th><th>Looptijd</th></tr></thead><tbody>${rows}</tbody>`;
+  calcInterest();
+}
+function calcInterest(){
+  const amt=parseFloat(document.getElementById('sav-amt').value)||0;
+  const dur=parseFloat(document.getElementById('sav-dur').value)||1;
+  const type=document.getElementById('sav-per').value;
+  const rate=0.035;
+  const yrs={daily:dur/365,monthly:dur/12,quarterly:dur/4,annual:dur,anniversary:dur/12}[type];
+  const interest=amt*rate*yrs;
+  document.getElementById('sav-result').innerHTML=`Projected interest: <strong>€${N(interest)}</strong><br><span style="font-size:.78rem">${(rate*100).toFixed(1)}% p.a. · ${dur} ${type} periode(s)</span>`;
+}
+
+/* ---- LOANS ---- */
+const reqs=[
+  {b:'MKB-001',amt:15000,rate:7.2,term:24,purpose:'Equipment', risk:'B+'},
+  {b:'SME-042',amt:8000, rate:8.5,term:12,purpose:'Inventory',  risk:'B'},
+  {b:'IND-017',amt:25000,rate:6.0,term:36,purpose:'Expansion',  risk:'A-'},
+];
+const loans=[
+  {id:'L-001',b:'MKB-003',principal:12000,outstanding:8240, rate:7.5,next:'2026-07-01'},
+  {id:'L-002',b:'SME-019',principal:5000, outstanding:1820, rate:8.0,next:'2026-07-15'},
+  {id:'L-003',b:'IND-005',principal:30000,outstanding:24600,rate:5.5,next:'2026-07-01'},
+];
+function renderLoans(){
+  document.getElementById('req-table').innerHTML=`<thead><tr><th>Borrower</th><th>Bedrag</th><th>Rente</th><th>Term</th><th>Risk</th><th></th></tr></thead><tbody>`+
+    reqs.map(r=>`<tr><td>${r.b}</td><td>€${N(r.amt,0)}</td><td>${r.rate}%</td><td>${r.term}m</td><td>${r.risk}</td><td><button class="btn sm" onclick="alert('Bod geplaatst (demo)')">Bid</button></td></tr>`).join('')+'</tbody>';
+  document.getElementById('active-loans').innerHTML=`<thead><tr><th>ID</th><th>Borrower</th><th>Hoofdsom</th><th>Openstaand</th><th>Rente</th><th>Vervaldatum</th></tr></thead><tbody>`+
+    loans.map(l=>`<tr><td>${l.id}</td><td>${l.b}</td><td>€${N(l.principal,0)}</td><td>€${N(l.outstanding,0)}</td><td>${l.rate}%</td><td>${l.next}</td></tr>`).join('')+'</tbody>';
+  calcLoan();
+}
+function calcLoan(){
+  const P=parseFloat(document.getElementById('ls-p').value)||0;
+  const rAnn=parseFloat(document.getElementById('ls-r').value)||7;
+  const n=parseInt(document.getElementById('ls-t').value)||12;
+  const r=rAnn/1200;
+  const emi=r===0?P/n:P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+  document.getElementById('loan-emi').innerHTML=`EMI: <strong>€${N(emi)}</strong>/maand &nbsp;·&nbsp; Totaal: €${N(emi*n)} &nbsp;·&nbsp; Totaalrente: €${N(emi*n-P)}`;
+  let bal=P, rows='';
+  for(let i=1;i<=Math.min(6,n);i++){
+    const interest=bal*r, principal=emi-interest; bal=Math.max(0,bal-principal);
+    rows+=`<tr><td>${i}</td><td>€${N(emi)}</td><td>€${N(principal)}</td><td>€${N(interest)}</td><td>€${N(bal)}</td></tr>`;
+  }
+  document.getElementById('amort-table').innerHTML=`<thead><tr><th>#</th><th>EMI</th><th>Aflossing</th><th>Rente</th><th>Saldo</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+/* ---- LEDGER ---- */
+const trial=[
+  {account:'Cash & Equivalents',type:'Asset',    bal:185000},
+  {account:'Loan Portfolio',    type:'Asset',    bal:420000},
+  {account:'Investment Sec.',   type:'Asset',    bal:310000},
+  {account:'Member Deposits',   type:'Liability',bal:-680000},
+  {account:'Borrowings',        type:'Liability',bal:-120000},
+  {account:'Equity',            type:'Equity',   bal:-115000},
+];
+const journal=[
+  {ts:'2026-06-28 09:14',desc:'Repayment MKB-003',          dr:'Cash',              cr:'Loan Portfolio',   amt:1240},
+  {ts:'2026-06-27 14:32',desc:'New deposit SME-042',         dr:'Cash',              cr:'Member Deposits',  amt:5000},
+  {ts:'2026-06-25 10:00',desc:'Interest accrual Q2',         dr:'Interest Receiv.',  cr:'Interest Income',  amt:3850},
+  {ts:'2026-06-20 11:45',desc:'Loan disbursement IND-017',   dr:'Loan Portfolio',    cr:'Cash',             amt:25000},
+  {ts:'2026-06-15 08:30',desc:'Fund management fee',         dr:'Cash',              cr:'Fee Income',       amt:890},
+  {ts:'2026-06-10 16:00',desc:'Bond purchase',               dr:'Investment Sec.',   cr:'Cash',             amt:15000},
+  {ts:'2026-05-31 12:00',desc:'Monthly member interest pmt', dr:'Interest Expense',  cr:'Cash',             amt:4200},
+  {ts:'2026-05-15 09:00',desc:'New member deposit',          dr:'Cash',              cr:'Member Deposits',  amt:8000},
+  {ts:'2026-04-30 17:00',desc:'Loan closure L-088',          dr:'Cash',              cr:'Loan Portfolio',   amt:3200},
+  {ts:'2026-03-31 10:00',desc:'Q1 audit fee',                dr:'Admin Expense',     cr:'Cash',             amt:1500},
+];
+function renderJournal(){
+  const from=document.getElementById('led-from').value;
+  const to=document.getElementById('led-to').value;
+  const filtered=journal.filter(j=>j.ts.slice(0,10)>=from&&j.ts.slice(0,10)<=to);
+  const total=filtered.reduce((s,j)=>s+j.amt,0);
+  const rows=filtered.map(j=>`<tr><td>${j.ts}</td><td>${j.desc}</td><td>${j.dr}</td><td>${j.cr}</td><td>€${N(j.amt,0)}</td></tr>`).join('');
+  const tot=`<tr style="font-weight:600;color:#6c63ff"><td colspan="4">Totaal (${filtered.length} entries)</td><td>€${N(total,0)}</td></tr>`;
+  document.getElementById('journal-table').innerHTML=`<thead><tr><th>Timestamp</th><th>Omschrijving</th><th>Debet</th><th>Credit</th><th>Bedrag</th></tr></thead><tbody>${rows}${tot}</tbody>`;
+}
+function renderLedger(){
+  const totalAssets=trial.filter(r=>r.type==='Asset').reduce((s,r)=>s+r.bal,0);
+  const rows=trial.map(r=>`<tr><td>${r.account}</td><td>${r.type}</td><td class="${r.bal>=0?'pos':'neg'}">€${N(Math.abs(r.bal),0)}</td></tr>`).join('');
+  document.getElementById('trial-table').innerHTML=`<thead><tr><th>Rekening</th><th>Type</th><th>Saldo</th></tr></thead><tbody>${rows}<tr style="font-weight:600;color:#6c63ff"><td colspan="2">Totaal Activa</td><td>€${N(totalAssets,0)}</td></tr></tbody>`;
+  renderJournal();
+}
+function exportCSV(){
+  const from=document.getElementById('led-from').value, to=document.getElementById('led-to').value;
+  const filtered=journal.filter(j=>j.ts.slice(0,10)>=from&&j.ts.slice(0,10)<=to);
+  const csv='Timestamp,Omschrijving,Debet,Credit,Bedrag\n'+filtered.map(j=>`"${j.ts}","${j.desc}","${j.dr}","${j.cr}",${j.amt}`).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='vank-ledger.csv'; a.click();
+}
+
+/* ---- TABS ---- */
+function tab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('t-'+id).classList.add('active');
+}
+
+/* ---- INIT ---- */
+renderPortfolio(); renderFund(); renderSavings(); renderLoans(); renderLedger();
+</script>
+</body>
+</html>
