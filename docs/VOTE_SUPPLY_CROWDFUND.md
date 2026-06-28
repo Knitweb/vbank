@@ -1,11 +1,11 @@
-# Governance — the VoteBank, demographic supply, and recency-weighted voting
+# Governance — the Vault, demographic supply, and recency-weighted voting
 
-This is the vBank governance layer (`src/knitweb_vbank/`): how the collective makes decisions
+This is the vank governance layer (`src/knitweb_vank/`): how the collective makes decisions
 without letting any operator mint governance weight out of thin air. It answers three
 questions, each as a small, integer-only, float-free module that changes no signed record.
 
 > **TL;DR.** Votes are capped by **real registered people** (national identity *or* a
-> "freedom freeport" on-ramp), per world, plus that year's expected births. A **VoteBank**
+> "freedom freeport" on-ramp), per world, plus that year's expected births. A **Vault**
 > holds that supply in treasury and issues it **one-vote-per-person** with no premine. When
 > agents vote, **more recent votes weigh exponentially more** than older ones — computed in
 > exact integer arithmetic.
@@ -39,12 +39,12 @@ their vote. National `subject` is derived from the national id; freeport `subjec
 digests — a `subject` (dedup key) and a `proof` (evidence the identity/ad-hoc proof was
 presented). Each registration is itself content-addressed (`.cid`) for audit.
 
-## 2. The VoteBank (`votebank.py`)
+## 2. The Vault (`vault.py`)
 
-The `VoteBank` "keeps the vote supply in treasury" and issues it, mirroring the discipline of
+The `Vault` "keeps the vote supply in treasury" and issues it, mirroring the discipline of
 the native-PLS `Treasury`:
 
-- **No premine.** A fresh bank has issued nothing; the whole supply sits in the bank
+- **No premine.** A fresh vault has issued nothing; the whole supply sits in the vault
   (`treasury_remaining = max_vote_supply − issued`).
 - **Demographically bounded.** It can never issue past the registry's `max_vote_supply`.
 - **One vote per person.** A `subject` draws its single vote at most once (anti-replay).
@@ -71,16 +71,16 @@ default halves a vote's weight each beat (`num/den = 1/2`).
 The tally enforces **one vote per subject**, rejects votes "from the future" (`beat > now`),
 sums the weighted votes per choice, and returns a deterministic winner (ties break to the
 lexicographically smallest choice so every honest node agrees). It is **advisory/pure** — it
-only counts votes upstream produced (e.g. drawn from the `VoteBank`).
+only counts votes upstream produced (e.g. drawn from the `Vault`).
 
-## 4. Crowdfunding on the votebank (`crowdfund.py`)
+## 4. Crowdfunding on the vault (`crowdfund.py`)
 
 The same one-person-one-vote rule, applied to *funding*: **one person, one backing**. Ordinary
-token crowdfunding is plutocratic (most capital wins); votebank crowdfunding measures **breadth
+token crowdfunding is plutocratic (most capital wins); vault crowdfunding measures **breadth
 of real backers** alongside capital, so a whale can register once like everyone else but cannot
 manufacture support.
 
-A `Campaign` (bound to a `VoteBank` for its registry) succeeds only when it clears **both**:
+A `Campaign` (bound to a `Vault` for its registry) succeeds only when it clears **both**:
 
 - a capital **`goal`** (sum of PLS-wei pledged), and
 - a **`min_backers`** breadth threshold (distinct registered backers — national *or* freeport),
@@ -113,14 +113,14 @@ co-signing of the encounter is a noted production-hardening follow-up.
 
 The float analytics layer values instruments and *decides* what to pay: a bond coupon, a
 redemption, or a conversion. It quantises that decision to an integer amount and hands it across
-the seam. The vBank half takes that as an integer-only `SettlementOrder` and executes it as a
+the seam. The vank half takes that as an integer-only `SettlementOrder` and executes it as a
 dual-signed Knit:
 
 ```python
 # analytics side - the one explicit crossing:
 amount_wei = instruction.quantize()  # int(amount * scale) -> int
 
-# vBank side - integer value path:
+# vank side - integer value path:
 settle(SettlementOrder(kind, amount_wei), issuer, holder, timestamp=t)
 ```
 

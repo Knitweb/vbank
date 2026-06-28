@@ -1,6 +1,6 @@
 """Settle a governed instrument decision as an integer Knit — the Knitweb half of the seam.
 
-The float analytics layer (the standalone VoteBank repo) values instruments and *decides* what to
+The float analytics layer (the standalone Vault repo) values instruments and *decides* what to
 pay: a bond coupon, a redemption at face, or a conversion into underlying units. It values those in
 real numbers, then **quantises** the decision to an integer base-unit amount and hands it across
 the seam. This module is the Knitweb half — it takes an integer-only :class:`SettlementOrder` and

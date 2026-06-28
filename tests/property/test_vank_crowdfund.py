@@ -1,8 +1,8 @@
-"""Proofs for votebank crowdfunding: one-person-one-backing breadth + PLS capital, all-or-nothing.
+"""Proofs for vault crowdfunding: one-person-one-backing breadth + PLS capital, all-or-nothing.
 
 Principles under test:
   * No premine — the pool is exactly what real backers pledged.
-  * One backing per registered person (the votebank rule applied to funding); whales can't stuff.
+  * One backing per registered person (the vault rule applied to funding); whales can't stuff.
   * Success needs BOTH a capital goal AND a breadth (min_backers) threshold by the deadline.
   * All-or-nothing: met ⇒ release to beneficiary; not met ⇒ refund everyone.
   * Recent backing weighs exponentially more (momentum), without changing settlement.
@@ -10,22 +10,22 @@ Principles under test:
 
 import pytest
 
-from knitweb_vbank import (
+from knitweb_vank import (
     Campaign,
     CampaignStatus,
     Decay,
-    VoteBank,
+    Vault,
     WorldRegistry,
     register_freeport,
     register_national,
 )
 
 
-def _bank_with(people):
+def _vault_with(people):
     reg = WorldRegistry(year=2026)
     for p in people:
         reg.register(p)
-    return VoteBank(reg)
+    return Vault(reg)
 
 
 def _person(i):
@@ -34,8 +34,8 @@ def _person(i):
 
 @pytest.mark.property
 def test_fresh_campaign_holds_nothing():
-    bank = _bank_with([_person(1)])
-    c = Campaign(bank, beneficiary="pls1beneficiary", goal=100, deadline=10)
+    vault = _vault_with([_person(1)])
+    c = Campaign(vault, beneficiary="pls1beneficiary", goal=100, deadline=10)
     assert c.status is CampaignStatus.OPEN
     assert c.total_raised() == 0 and c.backers() == 0
     assert c.cid.startswith("b")
@@ -43,8 +43,8 @@ def test_fresh_campaign_holds_nothing():
 
 @pytest.mark.property
 def test_only_registered_people_may_back():
-    bank = _bank_with([])  # empty registry
-    c = Campaign(bank, beneficiary="pls1b", goal=10, deadline=10)
+    vault = _vault_with([])  # empty registry
+    c = Campaign(vault, beneficiary="pls1b", goal=10, deadline=10)
     with pytest.raises(ValueError, match="not registered"):
         c.pledge(_person(99), 5, beat=1)
 
@@ -52,8 +52,8 @@ def test_only_registered_people_may_back():
 @pytest.mark.property
 def test_one_backing_per_person():
     p = _person(1)
-    bank = _bank_with([p])
-    c = Campaign(bank, beneficiary="pls1b", goal=10, deadline=10)
+    vault = _vault_with([p])
+    c = Campaign(vault, beneficiary="pls1b", goal=10, deadline=10)
     first = c.pledge(p, 5, beat=1)
     assert first is not None and first.amount == 5
     assert c.pledge(p, 50, beat=2) is None        # same person can't back again (no whale stuffing)
@@ -63,8 +63,8 @@ def test_one_backing_per_person():
 @pytest.mark.property
 def test_pledge_after_deadline_rejected():
     p = _person(1)
-    bank = _bank_with([p])
-    c = Campaign(bank, beneficiary="pls1b", goal=10, deadline=5)
+    vault = _vault_with([p])
+    c = Campaign(vault, beneficiary="pls1b", goal=10, deadline=5)
     with pytest.raises(ValueError, match="deadline"):
         c.pledge(p, 5, beat=6)
 
@@ -72,8 +72,8 @@ def test_pledge_after_deadline_rejected():
 @pytest.mark.property
 def test_funded_releases_all_to_beneficiary():
     people = [_person(i) for i in range(3)]
-    bank = _bank_with(people)
-    c = Campaign(bank, beneficiary="pls1b", goal=30, deadline=10, min_backers=3)
+    vault = _vault_with(people)
+    c = Campaign(vault, beneficiary="pls1b", goal=30, deadline=10, min_backers=3)
     for i, p in enumerate(people):
         c.pledge(p, 10, beat=i + 1)
     assert c.is_goal_met()
@@ -87,8 +87,8 @@ def test_funded_releases_all_to_beneficiary():
 def test_capital_met_but_breadth_missing_expires():
     # Two people pledge enough capital, but the campaign demands 3 distinct backers ⇒ refund.
     people = [_person(1), _person(2)]
-    bank = _bank_with(people)
-    c = Campaign(bank, beneficiary="pls1b", goal=20, deadline=10, min_backers=3)
+    vault = _vault_with(people)
+    c = Campaign(vault, beneficiary="pls1b", goal=20, deadline=10, min_backers=3)
     c.pledge(people[0], 15, beat=1)
     c.pledge(people[1], 15, beat=2)
     assert c.total_raised() == 30 >= c.goal      # capital cleared
@@ -102,8 +102,8 @@ def test_capital_met_but_breadth_missing_expires():
 @pytest.mark.property
 def test_underfunded_refunds_everyone():
     people = [_person(i) for i in range(2)]
-    bank = _bank_with(people)
-    c = Campaign(bank, beneficiary="pls1b", goal=100, deadline=5)
+    vault = _vault_with(people)
+    c = Campaign(vault, beneficiary="pls1b", goal=100, deadline=5)
     for i, p in enumerate(people):
         c.pledge(p, 10, beat=i + 1)
     res = c.resolve(now=5)
@@ -114,8 +114,8 @@ def test_underfunded_refunds_everyone():
 
 @pytest.mark.property
 def test_cannot_resolve_before_deadline():
-    bank = _bank_with([_person(1)])
-    c = Campaign(bank, beneficiary="pls1b", goal=10, deadline=10)
+    vault = _vault_with([_person(1)])
+    c = Campaign(vault, beneficiary="pls1b", goal=10, deadline=10)
     with pytest.raises(ValueError, match="still open"):
         c.resolve(now=9)
 
@@ -123,8 +123,8 @@ def test_cannot_resolve_before_deadline():
 @pytest.mark.property
 def test_resolve_is_idempotent_and_closes_pledging():
     p = _person(1)
-    bank = _bank_with([p])
-    c = Campaign(bank, beneficiary="pls1b", goal=1, deadline=5)
+    vault = _vault_with([p])
+    c = Campaign(vault, beneficiary="pls1b", goal=1, deadline=5)
     c.pledge(p, 5, beat=1)
     first = c.resolve(now=5)
     second = c.resolve(now=99)
@@ -137,8 +137,8 @@ def test_resolve_is_idempotent_and_closes_pledging():
 def test_no_premine_conservation():
     # Pool out == pool in: released amount (funded) equals total pledged; refunds sum to total.
     people = [_person(i) for i in range(4)]
-    bank = _bank_with(people)
-    c = Campaign(bank, beneficiary="pls1b", goal=40, deadline=10, min_backers=4)
+    vault = _vault_with(people)
+    c = Campaign(vault, beneficiary="pls1b", goal=40, deadline=10, min_backers=4)
     for i, p in enumerate(people):
         c.pledge(p, 10, beat=i + 1)
     res = c.resolve(now=10)
@@ -149,14 +149,14 @@ def test_no_premine_conservation():
 def test_momentum_weights_recent_backing_more():
     # Two campaigns, identical capital & backers, but one's support is fresh ⇒ higher momentum.
     people = [_person(i) for i in range(2)]
-    bank = _bank_with(people)
+    vault = _vault_with(people)
     decay = Decay(num=1, den=2)
 
-    fresh = Campaign(bank, beneficiary="pls1b", goal=20, deadline=10, min_backers=2)
+    fresh = Campaign(vault, beneficiary="pls1b", goal=20, deadline=10, min_backers=2)
     fresh.pledge(people[0], 10, beat=10)
     fresh.pledge(people[1], 10, beat=10)
 
-    stalled = Campaign(bank, beneficiary="pls1b", goal=20, deadline=10, min_backers=2)
+    stalled = Campaign(vault, beneficiary="pls1b", goal=20, deadline=10, min_backers=2)
     stalled.pledge(people[0], 10, beat=2)
     stalled.pledge(people[1], 10, beat=2)
 
@@ -169,8 +169,8 @@ def test_momentum_weights_recent_backing_more():
 @pytest.mark.property
 def test_bool_amount_rejected():
     p = _person(1)
-    bank = _bank_with([p])
-    c = Campaign(bank, beneficiary="pls1b", goal=10, deadline=10)
+    vault = _vault_with([p])
+    c = Campaign(vault, beneficiary="pls1b", goal=10, deadline=10)
     with pytest.raises(TypeError):
         c.pledge(p, True, beat=1)
 
@@ -180,8 +180,8 @@ def test_freeport_backers_count_for_breadth():
     # The freeport on-ramp lets the unbanked back campaigns too — breadth includes them.
     nat = register_national("earth", "citizen", timestamp=1)
     fp = register_freeport("earth", imei="I-1", email="a@fp", ad_hoc_proof="vow", timestamp=2)
-    bank = _bank_with([nat, fp])
-    c = Campaign(bank, beneficiary="pls1b", goal=2, deadline=10, min_backers=2)
+    vault = _vault_with([nat, fp])
+    c = Campaign(vault, beneficiary="pls1b", goal=2, deadline=10, min_backers=2)
     c.pledge(nat, 1, beat=1)
     c.pledge(fp, 1, beat=2)
     assert c.is_goal_met() and c.resolve(now=10).funded

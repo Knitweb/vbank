@@ -1,4 +1,4 @@
-"""Liquid (delegated) voting for vBank — a voter may delegate their weight to another.
+"""Liquid (delegated) voting for vank — a voter may delegate their weight to another.
 
 A delegation is a signed record (gated by the delegator's personhood ticket, like a ballot)
 naming the delegate by scope nullifier. At tally time, weight flows along delegation chains to

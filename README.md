@@ -1,15 +1,15 @@
 # knitweb/vank
 
-VoteBank DAO, graphical Scrum Poker, and pulse-integrated voting governance for Knitweb.
+Vault DAO, graphical Scrum Poker, and pulse-integrated voting governance for Knitweb.
 
 Two packages co-reside in `src/`:
 
 | Package | Description |
 |---------|-------------|
-| `knitweb_vbank` | Pulse-integrated voting governance: personhood-gated ballots, deterministic tallying, signed polls, ranked/liquid/crowdfund voting |
+| `knitweb_vank` | Pulse-integrated voting governance: personhood-gated ballots, deterministic tallying, signed polls, ranked/liquid/crowdfund voting |
 | `vank` | Standalone float-friendly DAO + graphical Scrum Poker (zero deps beyond stdlib) |
 
-## knitweb_vbank
+## knitweb_vank
 
 Pulse-dependent voting domain layer:
 
@@ -22,11 +22,11 @@ Pulse-dependent voting domain layer:
 
 Requires `knitweb` (Pulse) for canonical CIDs, signatures, fabric Web, and personhood tickets.
 
-## vank — VoteBank DAO + Scrum Poker
+## vank — Vault DAO + Scrum Poker
 
 Standalone, zero-dependency (stdlib only) DAO layer with graphical Scrum Poker:
 
-- `VoteBankDAO` — float-friendly, insertion-ordered, recency-weighted tally, EMA momentum
+- `VankDAO` — float-friendly, insertion-ordered, recency-weighted tally, EMA momentum
 - `PokerSession` — Fibonacci deck, tolerance-based consensus, outlier detection, upper-median agreed card
 - HTTP server + self-contained vanilla JS UI (card grid, reveal, distribution chart, velocity sparkline)
 
@@ -48,12 +48,12 @@ PYTHONPATH=src python3 -m vank.poker_server --port 8000
 
 ```
 src/
-  knitweb_vbank/   pulse-integrated governance modules
+  knitweb_vank/   pulse-integrated governance modules
   vank/            standalone DAO + Scrum Poker
     static/        poker.html self-contained UI
 tests/
   property/
-    test_vbank_*   knitweb_vbank property tests (require knitweb)
+    test_vbank_*   knitweb_vank property tests (require knitweb)
     test_vank_*    standalone vank tests (no deps)
 docs/              architecture, vote-supply, time-value notes
 ```

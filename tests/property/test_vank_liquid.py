@@ -3,7 +3,7 @@
 import pytest
 
 from knitweb.core import crypto
-from knitweb_vbank import (
+from knitweb_vank import (
     BALLOT_KIND,
     DELEGATION_KIND,
     LIQUID_RESULT_KIND,

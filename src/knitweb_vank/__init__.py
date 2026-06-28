@@ -1,6 +1,6 @@
-"""vBank (minimal stub) — a vote is impossible without a personhood ticket.
+"""vank (minimal stub) — a vote is impossible without a personhood ticket.
 
-This is *not* the full vBank app (that is Step 5 of the adoption roadmap). It is the
+This is *not* the full vank app (that is Step 5 of the adoption roadmap). It is the
 smallest domain knitweb that proves the personhood foundation is consumed as a gate rather
 than bolted on: :meth:`VbankKnitweb.emit` refuses to produce a ballot unless it is handed
 a :class:`~knitweb.personhood.gate.PersonhoodTicket` that matches the ballot's scope, voter,
@@ -74,7 +74,7 @@ from .registry import (
     register_freeport,
     register_national,
 )
-from .votebank import VoteBank, VoteIssuance
+from .vault import Vault, VoteIssuance
 from .recency import Decay, Vote, WeightedTally, recency_tally
 from .crowdfund import Campaign, CampaignResult, CampaignStatus, Pledge
 from .proximity import ProximityProof, attest as attest_proximity
@@ -94,7 +94,7 @@ __all__ = [
     "Election", "VbankElection", "collect_elections", "election_status", "is_election_open",
     "election_poll_records", "ELECTION_KIND",
     "Registration", "RegistrationKind", "WorldRegistry", "register_national",
-    "register_freeport", "VoteBank", "VoteIssuance", "Decay", "Vote",
+    "register_freeport", "Vault", "VoteIssuance", "Decay", "Vote",
     "WeightedTally", "recency_tally", "Campaign", "CampaignResult",
     "CampaignStatus", "Pledge", "ProximityProof", "attest_proximity",
     "SettlementKind", "SettlementOrder", "settle",

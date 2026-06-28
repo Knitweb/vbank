@@ -1,6 +1,6 @@
-"""Deterministic, one-person-one-vote tally for vBank — the public audit-trail half.
+"""Deterministic, one-person-one-vote tally for vank — the public audit-trail half.
 
-The vBank guardrail (``docs/DOMAIN_KNITWEB_INTERFACE.md``) requires a *deterministic tally and
+The vank guardrail (``docs/DOMAIN_KNITWEB_INTERFACE.md``) requires a *deterministic tally and
 public audit trail*. This computes a result that is byte-for-byte reproducible by any peer from
 the same ballot set, regardless of order:
 

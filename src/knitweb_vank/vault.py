@@ -1,12 +1,12 @@
-"""The VoteBank — keeps the vote supply in treasury and issues it one-per-person.
+"""The Vault — keeps the vote supply in treasury and issues it one-per-person.
 
 Mirrors the native-PLS :class:`~knitweb.token.mint.Treasury` discipline, but for governance
 votes instead of money:
 
-  * **No premine.** A fresh :class:`VoteBank` has issued nothing; the whole supply sits in
-    the bank's *treasury*. Votes come into a person's hands only by registering first.
-  * **Demographically bounded.** The bank can never issue more votes than the
-    :class:`~knitweb_vbank.registry.WorldRegistry`'s :meth:`max_vote_supply` — registered
+  * **No premine.** A fresh :class:`Vault` has issued nothing; the whole supply sits in
+    the vault's *treasury*. Votes come into a person's hands only by registering first.
+  * **Demographically bounded.** The vault can never issue more votes than the
+    :class:`~knitweb_vank.registry.WorldRegistry`'s :meth:`max_vote_supply` — registered
     persons worldwide (national **and** freeport) plus this year's expected births. So the
     treasury is sized by real demographics, not by fiat.
   * **One vote per person.** A given ``subject`` (the registry's worldwide dedup key) draws
@@ -15,8 +15,8 @@ votes instead of money:
     set of issued votes is replay-detectable and the treasury balance is exact:
     ``treasury_remaining = max_vote_supply - issued``.
 
-The votes this bank issues are then cast and aggregated by
-:mod:`knitweb_vbank.recency` (where more recent votes weigh exponentially more). All integer /
+The votes this vault issues are then cast and aggregated by
+:mod:`knitweb_vank.recency` (where more recent votes weigh exponentially more). All integer /
 hash only; no floats, no canonical-encoding changes.
 """
 
@@ -28,12 +28,12 @@ from typing import List, Set
 from knitweb.core import canonical
 from .registry import Registration, WorldRegistry
 
-__all__ = ["VoteIssuance", "VoteBank"]
+__all__ = ["VoteIssuance", "Vault"]
 
 
 @dataclass(frozen=True)
 class VoteIssuance:
-    """An auditable record of one vote drawn from the bank's treasury to a person."""
+    """An auditable record of one vote drawn from the vault's treasury to a person."""
 
     subject: str       # the registry dedup key of the person who received the vote
     world: str
@@ -54,7 +54,7 @@ class VoteIssuance:
         return canonical.cid(self.to_record())
 
 
-class VoteBank:
+class Vault:
     """Issuer of governance votes, bounded by a world registry's demographic cap.
 
     There is intentionally **no** raw, ungated way to create a vote: the only way one enters
@@ -74,7 +74,7 @@ class VoteBank:
         return subject in self._issued_subjects
 
     def treasury_remaining(self) -> int:
-        """Votes still held in the bank (the demographic cap minus what's been issued)."""
+        """Votes still held in the vault (the demographic cap minus what's been issued)."""
         return self.registry.max_vote_supply() - self.issued
 
     def issue(self, registration: Registration, *, beat: int) -> VoteIssuance | None:

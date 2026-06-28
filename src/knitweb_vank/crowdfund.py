@@ -1,12 +1,12 @@
-"""Crowdfunding on the votebank — fund proposals by breadth of backers, not weight of whales.
+"""Crowdfunding on the vault — fund proposals by breadth of backers, not weight of whales.
 
 Ordinary token crowdfunding is plutocratic: whoever brings the most capital decides. The
-votebank already solves the matching problem for governance — **one registered person, one
+vault already solves the matching problem for governance — **one registered person, one
 vote** (national identity *or* freedom-freeport), demographically capped — so this module
 applies that same principle to *funding*: **one person, one backing**. A campaign therefore
 measures two things at once:
 
-  * **Breadth** — how many *distinct registered people* back it (the votebank's one-per-person
+  * **Breadth** — how many *distinct registered people* back it (the vault's one-per-person
     rule; a whale cannot manufacture support, only register once like everyone else); and
   * **Capital** — the PLS each backer pledges behind their single backing.
 
@@ -32,7 +32,7 @@ from .proximity import ProximityProof
 from .registry import Registration
 from .recency import Decay, Vote, recency_tally
 from .validation import require_int as _require_int, require_text as _require_text
-from .votebank import VoteBank
+from .vault import Vault
 
 __all__ = ["CampaignStatus", "Pledge", "CampaignResult", "Campaign"]
 
@@ -50,7 +50,7 @@ class CampaignStatus(Enum):
 class Pledge:
     """One person's single backing of a campaign: their ``subject`` + PLS-wei ``amount``."""
 
-    backer: str        # the registry dedup key — one backing per person (votebank principle)
+    backer: str        # the registry dedup key — one backing per person (vault principle)
     amount: int        # PLS-wei pledged behind this backing
     beat: int          # Pulse beat the pledge was made
 
@@ -84,17 +84,17 @@ class CampaignResult:
 
 
 class Campaign:
-    """A votebank-gated crowdfunding campaign: breadth (one person, one backing) + PLS capital.
+    """A vault-gated crowdfunding campaign: breadth (one person, one backing) + PLS capital.
 
-    Bound to a :class:`~knitweb_vbank.votebank.VoteBank` purely for its registry: only
-    registered people may back, and each backs at most once (the votebank's one-per-person rule
+    Bound to a :class:`~knitweb_vank.vault.Vault` purely for its registry: only
+    registered people may back, and each backs at most once (the vault's one-per-person rule
     applied to funding). Succeeds at resolution iff it cleared **both** the capital ``goal`` and
     the ``min_backers`` breadth threshold by ``deadline``.
     """
 
     def __init__(
         self,
-        bank: VoteBank,
+        vault: Vault,
         beneficiary: str,
         goal: int,
         deadline: int,
@@ -106,9 +106,9 @@ class Campaign:
         proximity_window: int = 0,
         min_rssi_dbm: int = -90,
     ) -> None:
-        if not isinstance(bank, VoteBank):
-            raise TypeError("bank must be a VoteBank")
-        self.bank = bank
+        if not isinstance(vault, Vault):
+            raise TypeError("vault must be a Vault")
+        self.vault = vault
         self.beneficiary = _require_text("beneficiary", beneficiary)
         self.goal = _require_int("goal", goal, minimum=1)
         self.created = _require_int("created", created, minimum=0)
@@ -143,8 +143,8 @@ class Campaign:
     ) -> Pledge | None:
         """Back this campaign once with ``amount`` PLS-wei. None if this person already backed.
 
-        Requires the campaign OPEN, the person **registered** in the bank's registry, and the
-        pledge to land within ``[created, deadline]``. One backing per person (votebank rule).
+        Requires the campaign OPEN, the person **registered** in the vault's registry, and the
+        pledge to land within ``[created, deadline]``. One backing per person (vault rule).
 
         An optional ``proximity`` proof marks the pledge as a **local** (Bluetooth-present)
         backing: the proof must be for this ``subject`` and the campaign's ``beacon``, in range
@@ -164,7 +164,7 @@ class Campaign:
             raise ValueError("pledge beat is past the campaign deadline")
 
         subject = registration.subject
-        if not self.bank.registry.is_registered(subject):
+        if not self.vault.registry.is_registered(subject):
             raise ValueError("backer is not registered — register before backing")
         if subject in self._backers:
             return None  # one backing per person — no whale stuffing the ballot
@@ -218,7 +218,7 @@ class Campaign:
     def momentum(self, *, now: int, decay: Decay | None = None) -> int:
         """Recency-weighted backing: recent pledges weigh exponentially more (governance tally).
 
-        Reuses :func:`knitweb_vbank.recency.recency_tally` (one-vote-per-subject already holds, since
+        Reuses :func:`knitweb_vank.recency.recency_tally` (one-vote-per-subject already holds, since
         backers are unique), so a campaign gaining support *now* reads hotter than a stalled one.
         Advisory only — it does not change the all-or-nothing settlement.
         """

@@ -19,7 +19,7 @@ weight is floored to 0 (very old votes stop counting), which also bounds the wor
 The tally enforces **one vote per subject** (one person, one vote) and returns the
 exponentially-weighted sum per choice plus the deterministic winner. It is pure / advisory:
 it only counts votes some upstream produced (e.g. drawn from
-:class:`~knitweb_vbank.votebank.VoteBank`), and changes no signed record.
+:class:`~knitweb_vank.vault.Vault`), and changes no signed record.
 """
 
 from __future__ import annotations

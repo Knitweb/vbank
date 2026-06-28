@@ -1,4 +1,4 @@
-"""VoteBankDAO — float-friendly financial time-series vote bank.
+"""VankDAO — float-friendly financial time-series vote vault.
 
 Unlike the parent pulse codebase, floats are *allowed* here; this module
 is intentionally designed for financial / time-series tallying.
@@ -8,7 +8,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 
-__all__ = ["Ballot", "VoteBankDAO"]
+__all__ = ["Ballot", "VankDAO"]
 
 
 @dataclass
@@ -21,7 +21,7 @@ class Ballot:
     weight: float = 1.0
 
 
-class VoteBankDAO:
+class VankDAO:
     """Ordered-insertion member registry with recency-weighted vote tallying."""
 
     def __init__(self) -> None:

@@ -1,11 +1,11 @@
-"""Acceptance: a vBank vote is impossible without a valid personhood ticket, and the
+"""Acceptance: a vank vote is impossible without a valid personhood ticket, and the
 ballot never carries identity (mirrors roadmap line 53)."""
 
 import pytest
 
 from knitweb.core import canonical, crypto
 from knitweb.fabric.web import Web
-from knitweb_vbank import Ballot, VbankKnitweb
+from knitweb_vank import Ballot, VbankKnitweb
 from knitweb.personhood.gate import AnchorIndex, enroll, require_personhood
 from knitweb.personhood.nullifier import new_holder_secret, scope_nullifier
 from knitweb.personhood.pairwise import derive_pairwise_keypair, pairwise_address

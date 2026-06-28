@@ -1,6 +1,6 @@
-"""Shared validation helpers for knitweb_vbank modules.
+"""Shared validation helpers for knitweb_vank modules.
 
-All values on the knitweb_vbank record path are integer-only (canonical-CBOR
+All values on the knitweb_vank record path are integer-only (canonical-CBOR
 safe; no floats). These helpers enforce that invariant at construction time and
 are the single source of truth for the error messages users see.
 """

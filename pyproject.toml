@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "knitweb-vank"
 version = "0.2.0"
-description = "vank — VoteBank DAO, graphical Scrum Poker, and pulse-integrated voting governance for Knitweb"
+description = "vank — Vault DAO, graphical Scrum Poker, and pulse-integrated voting governance for Knitweb"
 requires-python = ">=3.12"
 readme = "README.md"
 license = { text = "Apache-2.0" }

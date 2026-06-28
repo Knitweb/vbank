@@ -1,9 +1,9 @@
-"""Property tests for VoteBankDAO."""
+"""Property tests for VankDAO."""
 import math
 
 import pytest
 
-from vank.dao import Ballot, VoteBankDAO
+from vank.dao import Ballot, VankDAO
 
 
 # ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ from vank.dao import Ballot, VoteBankDAO
 
 
 def test_join_idempotent_weight_unchanged():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice", 2.0)
     dao.join("alice", 9.9)  # second join must NOT update weight
     assert dao.members["alice"] == 2.0
@@ -20,7 +20,7 @@ def test_join_idempotent_weight_unchanged():
 
 
 def test_join_multiple_idempotent():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     for _ in range(5):
         dao.join("bob", 1.5)
     assert len(dao.members) == 1
@@ -28,7 +28,7 @@ def test_join_multiple_idempotent():
 
 
 def test_join_insertion_order():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     names = ["charlie", "alice", "bob", "zara"]
     for n in names:
         dao.join(n)
@@ -36,13 +36,13 @@ def test_join_insertion_order():
 
 
 def test_join_default_weight():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice")
     assert dao.members["alice"] == 1.0
 
 
 def test_member_list_order():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     for n in ["x", "y", "z"]:
         dao.join(n)
     assert dao.member_list() == ["x", "y", "z"]
@@ -54,7 +54,7 @@ def test_member_list_order():
 
 
 def test_cast_returns_ballot():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice", 3.0)
     b = dao.cast("alice", "option_a", 42.5)
     assert isinstance(b, Ballot)
@@ -65,14 +65,14 @@ def test_cast_returns_ballot():
 
 
 def test_cast_uses_member_weight():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice", 7.0)
     b = dao.cast("alice", "x", 1.0)
     assert b.weight == 7.0
 
 
 def test_cast_non_member_defaults_to_one():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     b = dao.cast("stranger", "x", 1.0)
     assert b.weight == 1.0
 
@@ -83,7 +83,7 @@ def test_cast_non_member_defaults_to_one():
 
 
 def test_decide_no_decay_equal_weights():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice")
     dao.join("bob")
     ballots = [dao.cast("alice", "yes", 1.0), dao.cast("bob", "no", 1.0)]
@@ -93,7 +93,7 @@ def test_decide_no_decay_equal_weights():
 
 
 def test_decide_recency_older_vote_discounted():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice")
     dao.join("bob")
     # alice votes at t=0, bob votes at t=10 (more recent)
@@ -107,7 +107,7 @@ def test_decide_recency_older_vote_discounted():
 
 
 def test_decide_recency_most_recent_is_undiscounted():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice")
     ballots = [dao.cast("alice", "yes", 99.9)]
     res = dao.decide(["yes"], ballots, decay=1.0)
@@ -116,13 +116,13 @@ def test_decide_recency_most_recent_is_undiscounted():
 
 
 def test_decide_empty_ballots():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     res = dao.decide(["a", "b"], [], decay=0.5)
     assert res == {"a": 0.0, "b": 0.0}
 
 
 def test_decide_ignores_unknown_option():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("alice")
     b = dao.cast("alice", "unknown_opt", 1.0)
     res = dao.decide(["yes", "no"], [b], decay=0.0)
@@ -130,7 +130,7 @@ def test_decide_ignores_unknown_option():
 
 
 def test_decide_weighted_members():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     dao.join("heavy", 10.0)
     dao.join("light", 1.0)
     ballots = [dao.cast("heavy", "yes", 1.0), dao.cast("light", "no", 1.0)]
@@ -145,25 +145,25 @@ def test_decide_weighted_members():
 
 
 def test_momentum_single_element():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     assert dao.momentum([7.0]) == pytest.approx(7.0)
 
 
 def test_momentum_two_elements():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     # ema = 0.3*20 + 0.7*10 = 6 + 7 = 13
     assert dao.momentum([10.0, 20.0], alpha=0.3) == pytest.approx(13.0)
 
 
 def test_momentum_convergence():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     series = [5.0] * 200
     result = dao.momentum(series, alpha=0.3)
     assert result == pytest.approx(5.0, abs=1e-6)
 
 
 def test_momentum_rising():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     series = list(range(1, 11))  # 1..10
     result = dao.momentum(series, alpha=0.5)
     # Should be between mid and latest
@@ -171,17 +171,17 @@ def test_momentum_rising():
 
 
 def test_momentum_empty():
-    dao = VoteBankDAO()
+    dao = VankDAO()
     assert dao.momentum([]) == 0.0
 
 
 def test_momentum_alpha_zero_returns_first():
     """alpha=0 → EMA never updates, stays at first value."""
-    dao = VoteBankDAO()
+    dao = VankDAO()
     assert dao.momentum([3.0, 100.0, 999.0], alpha=0.0) == pytest.approx(3.0)
 
 
 def test_momentum_alpha_one_returns_last():
     """alpha=1 → EMA always equals last value."""
-    dao = VoteBankDAO()
+    dao = VankDAO()
     assert dao.momentum([1.0, 2.0, 42.0], alpha=1.0) == pytest.approx(42.0)

@@ -1,6 +1,6 @@
-# vBank Architecture
+# vank Architecture
 
-vBank is a domain package on top of Knitweb/Pulse. It does not define core consensus,
+vank is a domain package on top of Knitweb/Pulse. It does not define core consensus,
 fabric, identity, or personhood primitives. It consumes those primitives to build
 auditable voting records.
 
@@ -33,7 +33,7 @@ Provided by Pulse:
 
 ## Agent Identity Issuance Boundary
 
-vBank may grow into an issuer of traceable agent identity attestations, but it should still
+vank may grow into an issuer of traceable agent identity attestations, but it should still
 avoid owning raw identity primitives on the public fabric.
 
 That means:
@@ -74,8 +74,8 @@ dedupe by scope nullifier, with highest sequence winning and CID tie-breaks wher
 
 ## Vote Supply And Crowdfunding
 
-The VoteBank supply modules migrated from `febuz/pulse` PR #74 live beside the ballot
-domain rather than inside Pulse core. `WorldRegistry` keeps the demographic cap, `VoteBank`
+The Vault supply modules migrated from `febuz/pulse` PR #74 live beside the ballot
+domain rather than inside Pulse core. `WorldRegistry` keeps the demographic cap, `Vault`
 issues one vote per registered subject from that cap, `recency_tally` handles integer
 geometric vote decay, and `Campaign` applies the same one-person rule to crowdfunding
 backing. `settle` remains a bridge onto Pulse ledger Knits; float analytics stay outside

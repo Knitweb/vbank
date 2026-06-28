@@ -13,7 +13,7 @@ an **exact integer ratio per Pulse beat** so it stays on the float-free value pa
 > in comparison, which the vocabulary rule permits.
 
 This note generalises the recency-weighting already shipped in
-`knitweb_vbank.recency.recency_tally`, where more recent votes weigh exponentially more
+`knitweb_vank.recency.recency_tally`, where more recent votes weigh exponentially more
 (see `docs/VOTE_SUPPLY_CROWDFUND.md`), into a single economic primitive that also expresses
 inflation, depreciation, and emission.
 

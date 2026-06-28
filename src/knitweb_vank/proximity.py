@@ -6,7 +6,7 @@ are actually there**. This module is the local-first primitive for that: a campa
 **beacon** (a BLE anchor at the place), and a backer's device records a :class:`ProximityProof`
 that it was within Bluetooth range of that beacon at a given Pulse beat.
 
-It dovetails with the votebank's existing on-ramps: a person is already one-vote/one-backing via
+It dovetails with the vault's existing on-ramps: a person is already one-vote/one-backing via
 the registry (national or freeport-by-IMEI), and the *device* (the same IMEI that freeport
 registration keys on) is what carries the BLE encounter. Proximity adds a second, orthogonal
 gate — *were you here?* — that capital cannot fake from afar.

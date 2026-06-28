@@ -140,7 +140,7 @@ class WorldRegistry:
 
     Holds at most one :class:`Registration` per ``subject`` (one vote per person, worldwide)
     and a per-world ``expected_births`` projection for the current ``year``. The cap it
-    exposes — :meth:`max_vote_supply` — is what the :class:`~knitweb_vbank.votebank.VoteBank`
+    exposes — :meth:`max_vote_supply` — is what the :class:`~knitweb_vank.vault.Vault`
     is allowed to issue against; it can only grow as real people register (no premine).
     """
 

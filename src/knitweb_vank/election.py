@@ -1,4 +1,4 @@
-"""Election manifests for vBank clients and indexers.
+"""Election manifests for vank clients and indexers.
 
 A poll is the signed definition for one question. An election is the signed
 manifest that groups one or more poll definitions into one user-facing voting

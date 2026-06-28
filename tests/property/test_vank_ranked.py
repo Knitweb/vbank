@@ -3,7 +3,7 @@
 import pytest
 
 from knitweb.core import crypto
-from knitweb_vbank import (
+from knitweb_vank import (
     RANKED_BALLOT_KIND,
     RANKED_RESULT_KIND,
     Poll,

@@ -1,6 +1,6 @@
-"""vBank poll lifecycle — authority-defined polls and signed, auditable results.
+"""vank poll lifecycle — authority-defined polls and signed, auditable results.
 
-A raw :func:`knitweb_vbank.tally.tally` is anonymous and unbounded: anyone could
+A raw :func:`knitweb_vank.tally.tally` is anonymous and unbounded: anyone could
 publish a "result" and a ballot could carry any integer choice. This adds the two pieces a
 real poll needs, both content-addressed and signed:
 

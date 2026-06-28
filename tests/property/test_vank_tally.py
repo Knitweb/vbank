@@ -1,10 +1,10 @@
-"""Proofs for the vBank deterministic tally: one-person-one-vote, order-independent, auditable."""
+"""Proofs for the vank deterministic tally: one-person-one-vote, order-independent, auditable."""
 
 import pytest
 
 from knitweb.core import canonical, crypto
 from knitweb.fabric.web import Web
-from knitweb_vbank import BALLOT_KIND, TALLY_KIND, collect_ballots, tally
+from knitweb_vank import BALLOT_KIND, TALLY_KIND, collect_ballots, tally
 
 SCOPE = "vbank"
 POLL = "p1"

@@ -1,22 +1,22 @@
-"""Proofs for governance: demographic vote supply, the VoteBank, and recency weighting.
+"""Proofs for governance: demographic vote supply, the Vault, and recency weighting.
 
 Principles under test:
-  * No premine — a fresh bank holds the whole supply in treasury, issued nothing.
+  * No premine — a fresh vault holds the whole supply in treasury, issued nothing.
   * One vote per person, worldwide, across national AND freeport registration paths.
   * Max supply = registered persons (national + freeport) + this year's expected births,
     counted per world (e.g. the moon).
-  * The bank never issues past the demographic cap.
+  * The vault never issues past the demographic cap.
   * When agents vote, more recent votes weigh exponentially more.
 """
 
 import pytest
 
-from knitweb_vbank import (
+from knitweb_vank import (
     Decay,
     Registration,
     RegistrationKind,
     Vote,
-    VoteBank,
+    Vault,
     WorldRegistry,
     register_freeport,
     register_national,
@@ -103,7 +103,7 @@ def test_bad_registration_inputs_rejected():
         WorldRegistry(year=2026).set_expected_births("earth", True)  # bool is not int
 
 
-# --- votebank issuance --------------------------------------------------------------------
+# --- vault issuance --------------------------------------------------------------------
 
 
 @pytest.mark.property
@@ -111,9 +111,9 @@ def test_no_premine_bank_holds_whole_supply():
     reg = WorldRegistry(year=2026)
     reg.register(register_national("earth", "E-1", timestamp=1))
     reg.set_expected_births("earth", 4)
-    bank = VoteBank(reg)
-    assert bank.issued == 0 and bank.issuances == []
-    assert bank.treasury_remaining() == 5                        # 1 person + 4 births, all in bank
+    vault = Vault(reg)
+    assert vault.issued == 0 and vault.issuances == []
+    assert vault.treasury_remaining() == 5                        # 1 person + 4 births, all in vault
 
 
 @pytest.mark.property
@@ -121,20 +121,20 @@ def test_issue_one_vote_per_person():
     reg = WorldRegistry(year=2026)
     r = register_national("earth", "E-1", timestamp=1)
     reg.register(r)
-    bank = VoteBank(reg)
-    first = bank.issue(r, beat=10)
+    vault = Vault(reg)
+    first = vault.issue(r, beat=10)
     assert first is not None and first.subject == r.subject
-    assert bank.issued == 1 and bank.treasury_remaining() == 0
-    assert bank.issue(r, beat=11) is None                        # no double-issue to same person
+    assert vault.issued == 1 and vault.treasury_remaining() == 0
+    assert vault.issue(r, beat=11) is None                        # no double-issue to same person
 
 
 @pytest.mark.property
 def test_cannot_issue_to_unregistered_person():
     reg = WorldRegistry(year=2026)
-    bank = VoteBank(reg)
+    vault = Vault(reg)
     stranger = register_national("earth", "NOBODY", timestamp=1)
     with pytest.raises(ValueError, match="not registered"):
-        bank.issue(stranger, beat=1)
+        vault.issue(stranger, beat=1)
 
 
 @pytest.mark.property
@@ -144,16 +144,16 @@ def test_issuance_never_exceeds_demographic_cap():
     people = [register_national("earth", f"E-{i}", timestamp=i) for i in range(2)]
     for p in people:
         reg.register(p)
-    bank = VoteBank(reg)
-    assert bank.issue(people[0], beat=1) is not None
-    assert bank.issue(people[1], beat=1) is not None
-    assert bank.issued == 2 and bank.treasury_remaining() == 0
-    # Register a third only AFTER the bank cap was measured against 2 — simulate exhaustion by
+    vault = Vault(reg)
+    assert vault.issue(people[0], beat=1) is not None
+    assert vault.issue(people[1], beat=1) is not None
+    assert vault.issued == 2 and vault.treasury_remaining() == 0
+    # Register a third only AFTER the vault cap was measured against 2 — simulate exhaustion by
     # checking the guard directly: a fresh person beyond the (frozen) supply gets nothing.
     extra = register_national("earth", "E-extra", timestamp=9)
     reg2 = WorldRegistry(year=2026)
     reg2.register(extra)
-    bank2 = VoteBank(reg2)
+    bank2 = Vault(reg2)
     bank2.issued = bank2.registry.max_vote_supply()             # pretend supply already drawn
     assert bank2.issue(extra, beat=1) is None
 
@@ -163,8 +163,8 @@ def test_issuance_is_auditable():
     reg = WorldRegistry(year=2026)
     r = register_freeport("moon", imei="I-9", email="m@fp", ad_hoc_proof="vow", timestamp=1)
     reg.register(r)
-    bank = VoteBank(reg)
-    iss = bank.issue(r, beat=42)
+    vault = Vault(reg)
+    iss = vault.issue(r, beat=42)
     assert iss.world == "moon" and iss.beat == 42 and iss.supply_at_issue == 1
     assert iss.cid.startswith("b")
 
@@ -239,20 +239,20 @@ def test_decay_rejects_non_shrinking_and_bool():
 
 @pytest.mark.property
 def test_end_to_end_register_issue_vote():
-    # Full loop: register people (both paths), draw their votes from the bank, tally with recency.
+    # Full loop: register people (both paths), draw their votes from the vault, tally with recency.
     reg = WorldRegistry(year=2026)
     alice = register_national("earth", "NL-A", timestamp=1)
     bob = register_freeport("earth", imei="I-B", email="b@fp", ad_hoc_proof="vow", timestamp=2)
     for p in (alice, bob):
         reg.register(p)
     reg.set_expected_births("earth", 1)
-    bank = VoteBank(reg)
-    assert bank.treasury_remaining() == 3                        # 2 persons + 1 birth allowance
+    vault = Vault(reg)
+    assert vault.treasury_remaining() == 3                        # 2 persons + 1 birth allowance
 
-    a_iss = bank.issue(alice, beat=20)
-    b_iss = bank.issue(bob, beat=24)
+    a_iss = vault.issue(alice, beat=20)
+    b_iss = vault.issue(bob, beat=24)
     assert a_iss is not None and b_iss is not None
-    assert bank.issued == 2 and bank.treasury_remaining() == 1   # the unborn's vote stays in bank
+    assert vault.issued == 2 and vault.treasury_remaining() == 1   # the unborn's vote stays in vault
 
     # Alice (earlier) votes no, Bob (later) votes yes ⇒ Bob's fresher vote dominates.
     votes = [Vote("no", alice.subject, a_iss.beat), Vote("yes", bob.subject, b_iss.beat)]

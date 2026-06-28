@@ -1,4 +1,4 @@
-"""Ranked-choice (instant-runoff) voting for vBank.
+"""Ranked-choice (instant-runoff) voting for vank.
 
 A ranked ballot lists options in preference order instead of a single choice. The tally is
 instant-runoff (IRV): count each voter's highest-ranked still-active option; if one option has a
@@ -7,7 +7,7 @@ smallest-id tie-break) and recount, redistributing each ballot to its next survi
 Ballots whose preferences are all eliminated are *exhausted* and drop out. Composes with
 fixed-point weights.
 
-Like every vBank result, IRV is deterministic and reproducible: same ballots ⇒ same rounds and
+Like every vank result, IRV is deterministic and reproducible: same ballots ⇒ same rounds and
 winner. Authority-certification of a ranked result mirrors the other result types and is a thin
 follow-up; this module provides the gated ballot, the read-model, and the pure algorithm.
 """

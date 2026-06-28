@@ -1,10 +1,10 @@
-"""Proofs for signed vBank election manifests."""
+"""Proofs for signed vank election manifests."""
 
 import pytest
 
 from knitweb.core import canonical, crypto
 from knitweb.fabric.web import Web
-from knitweb_vbank import (
+from knitweb_vank import (
     ELECTION_KIND,
     Election,
     Poll,

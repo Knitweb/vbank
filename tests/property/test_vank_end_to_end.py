@@ -1,11 +1,11 @@
 """End-to-end: define a poll, enrol real voters via the personhood gate, cast gated+signed
-ballots, certify the result. Proves personhood + vBank compose with *real* ballots (not
+ballots, certify the result. Proves personhood + vank compose with *real* ballots (not
 synthetic dicts) and that revocation blocks a voter before they can cast."""
 
 import pytest
 
 from knitweb.core import crypto
-from knitweb_vbank import Ballot, Poll, VbankKnitweb, VbankPoll
+from knitweb_vank import Ballot, Poll, VbankKnitweb, VbankPoll
 from knitweb.personhood.errors import RevokedError
 from knitweb.personhood.gate import AnchorIndex, enroll, require_personhood
 from knitweb.personhood.pairwise import derive_pairwise_keypair, pairwise_address

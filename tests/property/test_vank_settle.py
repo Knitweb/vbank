@@ -10,7 +10,7 @@ Principles under test:
 
 import pytest
 
-from knitweb_vbank import SettlementKind, SettlementOrder, settle
+from knitweb_vank import SettlementKind, SettlementOrder, settle
 from knitweb.ledger.node import AccountNode
 
 
